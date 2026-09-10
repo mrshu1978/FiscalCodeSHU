@@ -7,7 +7,7 @@
 
     <main class="app__main">
       <ResultDisplay :codice-fiscale="risultato.codiceFiscale" :copia-disponibile="risultato.copiaDisponibile" />
-      <CalculatorForm v-model:form="formDati" />
+      <CalculatorForm v-model:form="formDati" @calcola="onCalcola" />
     </main>
   </div>
 </template>
@@ -16,13 +16,19 @@
 import { ref } from 'vue';
 import CalculatorForm from './components/CalculatorForm.vue';
 import ResultDisplay from './components/ResultDisplay.vue';
-import { DATI_FORM_VUOTI, type FormDatiAnagrafici, type RisultatoCodiceFiscale } from './features/fiscalCode.types';
+import { DATI_FORM_VUOTI, type FormDatiAnagrafici } from './features/fiscalCode.types';
+import { calcolaCodiceFiscale } from './state/codiceFiscale';
+import { creaStatoRisultatoCodiceFiscale } from './state/store';
 
 const formDati = ref<FormDatiAnagrafici>({ ...DATI_FORM_VUOTI });
-const risultato = ref<RisultatoCodiceFiscale>({
-  codiceFiscale: null,
-  copiaDisponibile: false,
-});
+const { risultato, impostaCodiceFiscale } = creaStatoRisultatoCodiceFiscale();
+
+function onCalcola(): void {
+  const esito = calcolaCodiceFiscale(formDati.value);
+  if (esito.esito === 'successo') {
+    impostaCodiceFiscale(esito.codiceFiscale);
+  }
+}
 </script>
 
 <style>
