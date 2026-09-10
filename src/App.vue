@@ -11,6 +11,7 @@
         :copia-disponibile="risultato.copiaDisponibile"
         :stato-copia="statoCopia"
         :messaggio-copia="messaggioCopia"
+        :messaggio-errore="erroreCalcolo"
         @copia="onCopia"
       />
       <CalculatorForm
@@ -31,6 +32,7 @@ import { calcolaCodiceFiscale } from './state/codiceFiscale';
 import { creaStatoRisultatoCodiceFiscale } from './state/store';
 
 const formDati = ref<FormDatiAnagrafici>({ ...DATI_FORM_VUOTI });
+const erroreCalcolo = ref<string | null>(null);
 const {
   risultato,
   statoCopia,
@@ -44,13 +46,19 @@ const {
 function onCalcola(): void {
   const esito = calcolaCodiceFiscale(formDati.value);
   if (esito.esito === 'successo') {
+    erroreCalcolo.value = null;
     impostaSuccesso(esito.codiceFiscale);
     return;
   }
+  erroreCalcolo.value =
+    esito.esito === 'comune-non-riconosciuto'
+      ? 'Comune di nascita non riconosciuto: seleziona Venezia o Padova.'
+      : esito.messaggio;
   registraEsitoNegativo();
 }
 
 function onCampoModificato(): void {
+  erroreCalcolo.value = null;
   invalidaRisultato();
 }
 
@@ -60,8 +68,20 @@ function onCopia(): void {
 </script>
 
 <style>
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 :root {
   color-scheme: dark;
+}
+
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 body {
@@ -90,5 +110,19 @@ body {
   margin: 4px 0 0;
   font-size: 0.78rem;
   color: #94a3b8;
+}
+
+.app__main {
+  min-width: 0;
+}
+
+@media (max-width: 360px) {
+  .app {
+    padding: 16px 12px;
+  }
+
+  .app__header {
+    margin-bottom: 16px;
+  }
 }
 </style>
