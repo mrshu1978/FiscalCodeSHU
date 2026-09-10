@@ -15,7 +15,10 @@
       <span v-if="!codiceFiscale" class="result-display__segnaposto">{{ SEGNAPOSTO_RISULTATO }}</span>
     </p>
     <div v-if="copiaDisponibile" class="result-display__actions">
-      <button type="button" class="result-display__copy">Copia</button>
+      <button type="button" class="result-display__copy" @click="$emit('copia')">
+        {{ statoCopia === 'copiato' ? 'Copiato!' : 'Copia' }}
+      </button>
+      <p v-if="messaggioCopia" class="result-display__errore" role="alert">{{ messaggioCopia }}</p>
     </div>
   </div>
 </template>
@@ -23,11 +26,21 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { RisultatoCodiceFiscale } from '../features/fiscalCode.types';
+import type { StatoCopia } from '../state/store';
 
-const props = withDefaults(defineProps<RisultatoCodiceFiscale>(), {
+interface ResultDisplayProps extends RisultatoCodiceFiscale {
+  statoCopia?: StatoCopia;
+  messaggioCopia?: string | null;
+}
+
+const props = withDefaults(defineProps<ResultDisplayProps>(), {
   codiceFiscale: null,
   copiaDisponibile: false,
+  statoCopia: 'inattivo',
+  messaggioCopia: null,
 });
+
+defineEmits<{ copia: [] }>();
 
 const SEGNAPOSTO_RISULTATO = '\u2014 \u2014 \u2014';
 
@@ -89,7 +102,9 @@ const isRisultatoAttivo = computed<boolean>(() => props.codiceFiscale !== null);
 
 .result-display__actions {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
   margin-top: 14px;
 }
 
@@ -99,6 +114,12 @@ const isRisultatoAttivo = computed<boolean>(() => props.codiceFiscale !== null);
   border: none;
   border-radius: 8px;
   cursor: pointer;
+}
+
+.result-display__errore {
+  margin: 0;
+  font-size: 0.72rem;
+  color: #f87171;
 }
 
 @keyframes letterReveal {

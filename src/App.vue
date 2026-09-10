@@ -6,7 +6,13 @@
     </header>
 
     <main class="app__main">
-      <ResultDisplay :codice-fiscale="risultato.codiceFiscale" :copia-disponibile="risultato.copiaDisponibile" />
+      <ResultDisplay
+        :codice-fiscale="risultato.codiceFiscale"
+        :copia-disponibile="risultato.copiaDisponibile"
+        :stato-copia="statoCopia"
+        :messaggio-copia="messaggioCopia"
+        @copia="onCopia"
+      />
       <CalculatorForm
         v-model:form="formDati"
         @calcola="onCalcola"
@@ -25,8 +31,15 @@ import { calcolaCodiceFiscale } from './state/codiceFiscale';
 import { creaStatoRisultatoCodiceFiscale } from './state/store';
 
 const formDati = ref<FormDatiAnagrafici>({ ...DATI_FORM_VUOTI });
-const { risultato, impostaSuccesso, registraEsitoNegativo, invalidaRisultato } =
-  creaStatoRisultatoCodiceFiscale();
+const {
+  risultato,
+  statoCopia,
+  messaggioCopia,
+  impostaSuccesso,
+  registraEsitoNegativo,
+  invalidaRisultato,
+  copiaNegliAppunti,
+} = creaStatoRisultatoCodiceFiscale();
 
 function onCalcola(): void {
   const esito = calcolaCodiceFiscale(formDati.value);
@@ -39,6 +52,10 @@ function onCalcola(): void {
 
 function onCampoModificato(): void {
   invalidaRisultato();
+}
+
+function onCopia(): void {
+  void copiaNegliAppunti();
 }
 </script>
 
